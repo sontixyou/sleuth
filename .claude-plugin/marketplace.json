@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "plugin-security-checker",
-      "source": "plugin-security-checker",
+      "source": "./plugins/plugin-security-checker",
       "description": "Security scanner for Claude Code plugins - analyzes hooks, MCP servers, scripts, and prompts for potential risks",
       "version": "0.1.0",
       "author": {
