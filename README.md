@@ -1,6 +1,6 @@
 # sleuth
 
-Claude Code プラグインのセキュリティ問題を探偵のように追跡・発見するマーケットプレイス。
+A marketplace that tracks and uncovers security issues in Claude Code plugins — like a detective.
 
 ## Install
 
@@ -23,8 +23,8 @@ sleuth/
 
 | Plugin | Description |
 |--------|-------------|
-| [plugin-security-checker](./plugins/plugin-security-checker/) | Claude Code プラグインのセキュリティ監査ツール |
+| [plugin-security-checker](./plugins/plugin-security-checker/) | Security audit tool for Claude Code plugins |
 
 ## Adding plugins
 
-`plugins/` ディレクトリにプラグインを追加し、`marketplace.json` の `plugins` 配列に登録してください。
+Add your plugin to the `plugins/` directory and register it in the `plugins` array of `marketplace.json`.
