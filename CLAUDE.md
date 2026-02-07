@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Claude Code プラグインのマーケットプレイスリポジトリ。プラグインのカタログ管理と配布を行う。ビルドツールやテストフレームワークは使用していない。
+sleuth — Claude Code プラグインのセキュリティ問題を追跡・発見するマーケットプレイスリポジトリ。プラグインのカタログ管理と配布を行う。ビルドツールやテストフレームワークは使用していない。
 
 ## Install
 

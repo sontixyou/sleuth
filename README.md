@@ -1,6 +1,6 @@
-# claude-marketplace
+# sleuth
 
-Claude Code plugins marketplace.
+Claude Code プラグインのセキュリティ問題を探偵のように追跡・発見するマーケットプレイス。
 
 ## Install
 
@@ -11,13 +11,19 @@ claude plugin marketplace add <path-to-this-repo>
 ## Structure
 
 ```
-claude-marketplace/
+sleuth/
 ├── .claude-plugin/
 │   └── marketplace.json
 ├── plugins/
-│   └── .gitkeep
+│   └── plugin-security-checker/
 └── README.md
 ```
+
+## Plugins
+
+| Plugin | Description |
+|--------|-------------|
+| [plugin-security-checker](./plugins/plugin-security-checker/) | Claude Code プラグインのセキュリティ監査ツール |
 
 ## Adding plugins
 
