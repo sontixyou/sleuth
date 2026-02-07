@@ -1,0 +1,9 @@
+{
+  "name": "plugin-security-checker",
+  "version": "0.1.0",
+  "description": "Security scanner for Claude Code plugins - analyzes hooks, MCP servers, scripts, and prompts for potential risks",
+  "author": {
+    "name": "kengo.nishimura"
+  },
+  "keywords": ["security", "plugin", "audit", "scanner"]
+}
