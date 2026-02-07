@@ -1,0 +1,51 @@
+name: バグ報告
+description: バグや不具合を報告する
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: バグの内容
+      description: 発生している問題を説明してください
+      placeholder: "例: プラグインXをインストールすると、エラーが発生する"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: バグを再現する手順を記載してください
+      placeholder: |
+        1. `claude plugin marketplace add ...` を実行
+        2. ...
+        3. エラーが発生する
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待される動作
+      description: 本来どうなるべきかを記載してください
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の動作
+      description: 実際に何が起こったかを記載してください
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 環境情報
+      description: 問題が発生した環境を記載してください
+      placeholder: |
+        - OS: macOS 15.x
+        - Claude Code バージョン: x.x.x
+    validations:
+      required: false
