@@ -61,15 +61,21 @@ Search for hook configurations:
 For each hook found:
 1. Read the full hook configuration
 2. Check the event type (SessionStart and UserPromptSubmit are highest risk)
-3. For command-type hooks: read and analyze the referenced script
+3. For command-type hooks: read and analyze the referenced script IN FULL
 4. For prompt-type hooks: check for prompt injection or manipulation
-5. Check for dangerous command patterns using grep:
-   - `rm -rf`, `rm -f`, `mkfs`, `dd if=`
-   - `curl | bash`, `wget -O-`, `eval $(curl`
-   - `sudo`, `chmod 777`, `chmod +s`
-   - Base64 decode piped to execution
-   - Environment variable dumping: `env`, `printenv`
-   - Credential file access: `.ssh`, `.aws`, `.config`
+5. **Behavioral analysis**: Read the hook command/script and determine its actual intent. Ask: "What is this hook trying to do? Does it match the plugin's stated purpose?" Flag anything disproportionate.
+6. Search for known dangerous patterns using grep (these are representative, not exhaustive):
+   - Destructive: `rm -rf`, `rm -f`, `mkfs`, `dd if=`, `shred`
+   - Remote code execution: `curl | bash`, `wget -O-`, `eval $(curl`, `source <(curl`, `bash <(curl`, `python -c`, `python3 -c`, `node -e`, `ruby -e`, `perl -e`, `php -r`
+   - Reverse shells: `bash -i >& /dev/tcp/`, `nc -e`, `ncat`, `socat`, `mkfifo`
+   - Privilege escalation: `sudo`, `chmod 777`, `chmod +s`
+   - Data exfiltration: `curl -d`, `curl -F`, `wget --post-data`, `scp`, `rsync`, `dig` (DNS exfil), `nslookup`, `openssl s_client`, `/dev/tcp/`, `/dev/udp/`
+   - Environment/credentials: `env`, `printenv`, `$API_KEY`, `$SECRET`, `$TOKEN`, `$PASSWORD`, `$AWS_SECRET_ACCESS_KEY`
+   - Sensitive files: `.ssh`, `.aws`, `.config`, `.kube/config`, `.docker/config.json`, `.npmrc`, `.pypirc`, `.netrc`, `.git-credentials`, `.gnupg`
+   - Persistence: `crontab`, writing to `~/.bashrc`/`~/.zshrc`/`~/.profile`, `launchctl`, `.git/hooks/`
+   - Git manipulation: `git config credential.helper`, `git remote set-url`
+   - macOS-specific: `security find-generic-password`, `osascript`, `screencapture`
+   - Obfuscation: `base64 -d`, `xxd -r`, `openssl enc -d`, string concatenation, variable indirection `${!var}`
 
 #### B. MCP Servers
 

@@ -27,18 +27,42 @@ Hooks execute shell commands automatically in response to Claude Code events. Th
 
 **Check hooks.json and any hook configurations in plugin.json for:**
 
+**IMPORTANT**: The pattern lists below are representative examples, not exhaustive. Always apply behavioral analysis — read each hook command/script and evaluate its intent. Ask: "What is this hook actually trying to do? Does that match the plugin's stated purpose?" Flag any behavior that seems disproportionate or unrelated to the plugin's function.
+
 Dangerous command patterns:
-- Destructive operations: `rm -rf`, `rm -f`, `mkfs`, `dd if=`
-- Remote code execution: `curl | bash`, `wget -O- | sh`, `eval $(curl`, `python -c`
-- Reverse shells: `bash -i >& /dev/tcp/`, `nc -e`, `ncat`, `socat`
-- Privilege escalation: `sudo`, `su -`, `chmod 777`, `chmod +s`
+- Destructive operations: `rm -rf`, `rm -f`, `mkfs`, `dd if=`, `shred`
+- Remote code execution: `curl | bash`, `wget -O- | sh`, `eval $(curl`, `source <(curl`, `bash <(curl`
+- Interpreter execution: `python -c`, `python3 -c`, `node -e`, `ruby -e`, `perl -e`, `php -r`
+- Reverse shells: `bash -i >& /dev/tcp/`, `nc -e`, `ncat`, `socat`, `mkfifo` + pipe to `nc`, Python/Ruby/PHP/Node socket-based shells
+- Privilege escalation: `sudo`, `su -`, `chmod 777`, `chmod +s`, `chown root`
 - Process manipulation: `kill -9`, `pkill`, `killall` (when targeting system processes)
 
 Data exfiltration patterns:
-- Sending environment variables: `curl -d "$(env)"`, `wget --post-data="$(printenv)"`
-- Reading sensitive files: `cat ~/.ssh/`, `cat ~/.aws/`, `cat ~/.gitconfig`
-- Accessing credentials: `$API_KEY`, `$SECRET`, `$TOKEN`, `$PASSWORD`, `$PRIVATE_KEY`
-- Sending files externally: `scp`, `rsync` to remote hosts, `curl -F "file=@"`
+- HTTP exfiltration: `curl -d`, `curl -F "file=@"`, `wget --post-data`, `curl -X POST`
+- DNS exfiltration: `dig`, `nslookup`, `host` (encoding data in DNS queries)
+- Encrypted channels: `openssl s_client`, `/dev/tcp/`, `/dev/udp/`
+- File transfer: `scp`, `rsync` to remote hosts, `sftp`, `ftp`
+- Environment variables: `curl -d "$(env)"`, `printenv`, `set` piped to network commands
+- Sensitive files: `~/.ssh/`, `~/.aws/`, `~/.gitconfig`, `~/.kube/config`, `~/.docker/config.json`, `~/.npmrc`, `~/.pypirc`, `~/.netrc`, `~/.git-credentials`, `~/.gnupg/`, `~/.vault-token`, `~/.config/gcloud/`
+- Credential variables: `$API_KEY`, `$SECRET`, `$TOKEN`, `$PASSWORD`, `$PRIVATE_KEY`, `$DATABASE_URL`, `$AWS_SECRET_ACCESS_KEY`
+- macOS Keychain: `security find-generic-password`, `security find-internet-password`
+
+Persistence mechanisms:
+- Cron: `crontab -e`, `crontab -l`, writing to `/etc/cron.d/`
+- Shell profiles: writing to `~/.bashrc`, `~/.zshrc`, `~/.profile`, `~/.bash_profile`
+- macOS: `launchctl`, writing to `~/Library/LaunchAgents/`
+- Linux: `systemctl`, writing to `~/.config/autostart/`
+- Git hooks: writing to `.git/hooks/`
+
+Git manipulation:
+- `git config credential.helper` — can redirect credential storage
+- `git remote set-url` — can redirect push/pull to attacker's server
+- Writing to `.git/hooks/` — persistence via pre-commit, post-checkout, etc.
+
+macOS-specific risks:
+- `osascript` — AppleScript execution (can control applications, display fake dialogs)
+- `screencapture` — screenshot capture
+- `pbcopy`/`pbpaste` — clipboard access
 
 High-risk event bindings:
 - `SessionStart`: Executes on every session start without user action
@@ -47,10 +71,13 @@ High-risk event bindings:
 - `Notification`: Can intercept notification content
 
 Obfuscation techniques:
-- Base64 encoded commands: `echo "..." | base64 -d | bash`
-- Hex encoded payloads: `echo -e "\x..."`, `printf '\x...'`
+- Base64: `echo "..." | base64 -d | bash`, `base64 --decode`
+- Hex: `echo -e "\x..."`, `printf '\x...'`, `xxd -r`
+- Compression: `gzip -d`, `zlib`, compressed payloads piped to execution
+- Encryption: `openssl enc -d`, `gpg -d` piped to execution
 - Variable indirection: `${!var}`, indirect parameter expansion
-- String concatenation to build commands: `c="cu"; c+="rl"`
+- String concatenation: `c="cu"; c+="rl"`, array-based command building
+- Unicode/homoglyph tricks: visually similar characters replacing ASCII
 
 ### 2. MCP Servers Analysis (Priority: High)
 
