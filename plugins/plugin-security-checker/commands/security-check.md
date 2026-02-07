@@ -21,12 +21,34 @@ Perform a comprehensive security audit on a Claude Code plugin. The user provide
 
 Determine the plugin source from the argument:
 
-- **GitHub repository** (contains `/` but not a file path): Clone the repository to a temporary directory using `gh repo clone <owner/repo> /tmp/plugin-security-check-<repo-name> -- --depth 1`
+- **GitHub repository** (contains `/` and is in `owner/repo` format): Fetch files via `gh` CLI without cloning
 - **Local path** (starts with `/`, `./`, or `~`): Use the path directly after verifying it exists
 
 If no argument is provided, ask the user to specify a GitHub repository or local path.
 
-### 2. Locate the Plugin
+### 2. Fetch Plugin Files
+
+#### For GitHub repositories (no clone required):
+
+Download the plugin files to a temporary directory using the GitHub API:
+
+```bash
+# Create temp directory
+TMPDIR=$(mktemp -d /tmp/plugin-security-check-XXXXXX)
+
+# Download and extract the repository tarball
+gh api repos/{owner}/{repo}/tarball -H "Accept: application/vnd.github+json" > "$TMPDIR/repo.tar.gz"
+tar -xzf "$TMPDIR/repo.tar.gz" -C "$TMPDIR" --strip-components=1
+rm "$TMPDIR/repo.tar.gz"
+```
+
+This downloads a compressed archive via the API without creating a git clone, which is faster and uses less disk space.
+
+#### For local paths:
+
+Use the path directly after verifying it exists.
+
+### 3. Locate the Plugin
 
 The target may be:
 - A plugin directly (has `.claude-plugin/plugin.json` or standard plugin directories)
@@ -36,7 +58,7 @@ If it's a marketplace, list the available plugins and ask the user which one to 
 
 Determine the plugin root path for analysis.
 
-### 3. Run Security Analysis
+### 4. Run Security Analysis
 
 Launch the `security-scanner` agent using the Task tool with the following prompt:
 
@@ -54,7 +76,7 @@ Analyze all components systematically:
 Produce a complete security report with findings organized by severity.
 ```
 
-### 4. Present Results
+### 5. Present Results
 
 After the security-scanner agent completes its analysis, present the results to the user in the terminal:
 
@@ -63,16 +85,16 @@ After the security-scanner agent completes its analysis, present the results to 
 - Show the component overview
 - End with the conclusion and recommendation
 
-### 5. Cleanup
+### 6. Cleanup
 
-If a temporary clone was created, remove it:
+If a temporary directory was created for a GitHub repository, remove it:
 ```bash
-rm -rf /tmp/plugin-security-check-<repo-name>
+rm -rf "$TMPDIR"
 ```
 
 ## Notes
 
-- Always clone with `--depth 1` to minimize download time
-- If `gh` CLI is not available, fall back to `git clone`
+- GitHub repositories are fetched via `gh api` tarball endpoint — no git clone needed
+- Requires `gh` CLI to be installed and authenticated for GitHub repository scanning
 - The security-scanner agent handles all the actual analysis logic
-- Keep the output concise but complete - every finding should include evidence
+- Keep the output concise but complete — every finding should include evidence
